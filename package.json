@@ -1,0 +1,58 @@
+{
+  "name": "openai-agents-sdk-deep-research-demo-typescript",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Temporal interactive deep research demo using the OpenAI Agents SDK for TypeScript",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "npm run clean && tsc && npm run build:ui",
+    "build:ui": "esbuild ui/src/ts/api-client.ts ui/src/ts/index.ts ui/src/ts/success.ts --bundle --format=iife --outdir=ui/dist/js --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run clean && tsc && node --test dist/src/**/*.test.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run format:check && npm run typecheck && npm test && npm run build",
+    "predev": "npm run build:ui",
+    "dev": "tsx src/app.ts",
+    "dev:worker": "tsx src/worker.ts",
+    "predev:server": "npm run build:ui",
+    "dev:server": "tsx src/server/main.ts",
+    "cli": "tsx src/cli.ts",
+    "start": "node dist/src/app.js",
+    "start:worker": "node dist/src/worker.js",
+    "start:server": "node dist/src/server/main.js",
+    "start:cli": "node dist/src/cli.js"
+  },
+  "dependencies": {
+    "@openai/agents": "^0.3.0",
+    "@temporalio/activity": "^1.13.2",
+    "@temporalio/client": "^1.13.2",
+    "@temporalio/common": "^1.13.2",
+    "@temporalio/worker": "^1.13.2",
+    "@temporalio/workflow": "^1.13.2",
+    "cors": "^2.8.5",
+    "dompurify": "^3.2.6",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "marked": "^16.2.1",
+    "openai": "^6.0.0",
+    "pdfkit": "^0.17.2",
+    "sharp": "^0.35.3",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@temporalio/testing": "^1.22.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.2.1",
+    "@types/pdfkit": "^0.17.3",
+    "esbuild": "^0.25.9",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
+  }
+}

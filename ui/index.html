@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Durable, interactive research powered by OpenAI and Temporal."
+    />
+    <title>Durable Deep Research</title>
+    <link
+      rel="icon"
+      href="/static/public/icons/temporal-logo.svg"
+      type="image/svg+xml"
+    />
+    <link rel="stylesheet" href="/static/src/css/styles.css?v=4" />
+  </head>
+  <body>
+    <div class="page-background" aria-hidden="true"></div>
+
+    <main class="app-shell chat-shell">
+      <header class="brand-header">
+        <img
+          class="temporal-logo"
+          src="/static/public/icons/temporal-logo.svg"
+          width="48"
+          height="48"
+          alt="Temporal"
+        />
+        <p class="eyebrow">OpenAI Agents + Temporal</p>
+        <h1 class="main-heading">Durable Deep Research</h1>
+        <p class="subtitle">
+          Refine a question, search the web, and receive a cited research
+          report.
+        </p>
+        <a
+          class="workflow-id-link"
+          id="workflowIdLink"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        ></a>
+      </header>
+
+      <section class="research-card" aria-label="Research conversation">
+        <div
+          class="chat-container"
+          id="chatContainer"
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+        >
+          <div class="message bot">
+            <div class="message-bubble bot">
+              Hey there — what would you like me to research?
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="spinner-container"
+          id="spinnerContainer"
+          role="status"
+          aria-live="polite"
+          hidden
+        >
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="researching-text" id="statusText">Working…</span>
+        </div>
+
+        <section class="terminal-panel" id="terminalPanel" hidden>
+          <h2 id="terminalTitle">Research ended</h2>
+          <p id="terminalMessage"></p>
+          <button class="btn btn-primary" id="startNewButton" type="button">
+            Start new research
+          </button>
+        </section>
+
+        <form class="research-form" id="researchForm">
+          <label class="sr-only" for="researchInput"
+            >Research prompt or answer</label
+          >
+          <div class="input-wrapper">
+            <input
+              class="user-input"
+              id="researchInput"
+              name="researchInput"
+              type="text"
+              maxlength="4000"
+              placeholder="What would you like to research?"
+              autocomplete="off"
+              required
+            />
+            <button
+              class="submit-button"
+              id="submitButton"
+              type="submit"
+              aria-label="Send"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 16 16"
+                width="16"
+                height="16"
+                fill="none"
+              >
+                <path
+                  d="M3.333 8 8 3.333 12.667 8M8 12.667V3.333"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </form>
+
+        <div class="session-actions">
+          <button class="cancel-button" id="cancelButton" type="button" hidden>
+            Cancel research
+          </button>
+        </div>
+      </section>
+
+      <p class="page-footnote">
+        The workflow remains durable if the browser closes or the worker
+        restarts.
+      </p>
+    </main>
+
+    <script src="/static/dist/js/api-client.js"></script>
+    <script src="/static/dist/js/index.js"></script>
+  </body>
+</html>

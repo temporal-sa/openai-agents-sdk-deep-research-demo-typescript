@@ -1,0 +1,15 @@
+node_modules/
+dist/
+ui/dist/
+artifacts/
+output/
+coverage/
+*.tsbuildinfo
+*.log
+.env
+.env.*
+!.env-sample
+.DS_Store
+.idea/
+.vscode/
+.playwright-cli/

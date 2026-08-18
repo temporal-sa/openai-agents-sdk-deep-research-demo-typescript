@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Your durable deep-research report." />
+    <title>Research Report · Durable Deep Research</title>
+    <link
+      rel="icon"
+      href="/static/public/icons/temporal-logo.svg"
+      type="image/svg+xml"
+    />
+    <link rel="stylesheet" href="/static/src/css/styles.css?v=4" />
+  </head>
+  <body class="success-page">
+    <div class="page-background" aria-hidden="true"></div>
+
+    <main class="app-shell result-shell">
+      <header class="brand-header compact">
+        <img
+          class="temporal-logo"
+          src="/static/public/icons/temporal-logo.svg"
+          width="48"
+          height="48"
+          alt="Temporal"
+        />
+        <p class="eyebrow">OpenAI Agents + Temporal</p>
+        <h1 class="main-heading">Durable Deep Research</h1>
+        <a
+          class="workflow-id-link"
+          id="resultWorkflowLink"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        ></a>
+      </header>
+
+      <section class="result-card">
+        <div class="result-loading" id="loadingPanel" role="status">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Loading your research report…</p>
+        </div>
+
+        <section class="result-error" id="resultError" role="alert" hidden>
+          <div class="status-icon error" aria-hidden="true">!</div>
+          <h2 id="errorTitle">Unable to load the report</h2>
+          <p id="errorMessage"></p>
+        </section>
+
+        <article id="resultPanel" hidden>
+          <header class="result-heading">
+            <div class="status-icon success" aria-hidden="true">✓</div>
+            <div>
+              <p class="eyebrow">Workflow completed</p>
+              <h2>Research complete</h2>
+            </div>
+          </header>
+
+          <section class="summary-section" id="summarySection" hidden>
+            <h3>Executive summary</h3>
+            <p id="summaryText"></p>
+          </section>
+
+          <figure class="report-image-section" id="imageSection" hidden>
+            <a
+              id="openImageLink"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open generated research image"
+            >
+              <img
+                id="reportImage"
+                alt="AI-generated visualization for this research report"
+                loading="lazy"
+              />
+            </a>
+            <figcaption>Generated research visualization</figcaption>
+          </figure>
+
+          <section class="report-section" id="reportSection" hidden>
+            <button
+              class="report-toggle"
+              id="viewReportBtn"
+              type="button"
+              aria-expanded="true"
+              aria-controls="accordionContent"
+            >
+              <span class="report-button-label">Hide full report</span>
+              <svg
+                class="chevron open"
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+                width="20"
+                height="20"
+                fill="none"
+              >
+                <path
+                  d="m5 7.5 5 5 5-5"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <div class="accordion-content" id="accordionContent">
+              <div class="markdown-content" id="markdownContent"></div>
+            </div>
+          </section>
+
+          <section class="follow-up-section" id="followUpSection" hidden>
+            <h3>Questions to explore next</h3>
+            <ul id="followUpList"></ul>
+          </section>
+
+          <div class="artifact-actions" aria-label="Report downloads">
+            <a class="btn btn-primary" id="downloadPdfBtn" hidden>
+              Download PDF report
+            </a>
+            <button
+              class="btn btn-secondary"
+              id="downloadMarkdownBtn"
+              type="button"
+              hidden
+            >
+              Download Markdown report
+            </button>
+          </div>
+          <p class="artifact-note" id="artifactNote" hidden></p>
+        </article>
+
+        <a class="btn-start-over" id="startOverLink" href="/">
+          <img
+            src="/static/public/icons/start-over.svg"
+            width="15"
+            height="14"
+            alt=""
+          />
+          Start new research
+        </a>
+      </section>
+    </main>
+
+    <script src="/static/dist/js/api-client.js"></script>
+    <script src="/static/dist/js/success.js"></script>
+  </body>
+</html>

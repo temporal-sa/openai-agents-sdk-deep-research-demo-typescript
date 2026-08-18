@@ -1,0 +1,14 @@
+.git
+.github
+.env
+.env.*
+!.env-sample
+node_modules
+dist
+ui/dist
+artifacts
+output
+coverage
+.playwright-cli
+*.log
+.DS_Store

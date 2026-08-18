@@ -1,0 +1,5 @@
+node_modules/
+dist/
+ui/dist/
+ui/public/
+interactive_research_report.md
