@@ -38,6 +38,7 @@
     "dompurify": "^3.2.6",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.6.2",
     "marked": "^16.2.1",
     "openai": "^6.0.0",
     "pdfkit": "^0.17.2",
