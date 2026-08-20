@@ -204,9 +204,9 @@ curl -fsS -X POST \
 | `GET`  | `/artifacts/images/:file`                | Fetch a generated image                                   |
 | `GET`  | `/artifacts/reports/:file`               | Fetch a generated PDF                                     |
 
-Request bodies are JSON. Workflow routes and artifact downloads are protected
-when ingress authentication is enabled; health and readiness remain public for
-probes.
+Request bodies are JSON. The HTML entry points, workflow routes, and artifact
+downloads are protected when ingress authentication is enabled; health,
+readiness, and static browser assets remain public for probes and page loading.
 
 ## Authentication
 
@@ -225,9 +225,21 @@ production and `temporal-ingress` when `NODE_ENV=production`. Do not put
 port publicly: a caller able to forge the trusted header could impersonate a
 user.
 
-`FRONTEND_ORIGINS` is a comma-separated CORS allowlist. The local sample allows
-only `http://localhost:8234`; the deployment manifest allows only its public
-HTTPS origin.
+`FRONTEND_ORIGINS` is a comma-separated CORS allowlist of exact `http://` or
+`https://` origins (no wildcard, path, query, or fragment). The local sample
+allows only `http://localhost:8234`; the deployment manifest allows only its
+public HTTPS origin. When the setting is absent, cross-origin responses are not
+enabled; ordinary same-origin requests continue to work.
+
+The two HTML entry points are limited to 120 requests per minute per
+authenticated email. Starting research is limited to five requests per hour
+per authenticated email because each run launches several paid model calls.
+Authentication runs before both limits, avoiding ambiguous reverse-proxy IP
+addresses; in local `AUTH_MODE=disabled` use, requests intentionally share one
+local-demo identity. Status polling, answers, cancellation, and result retrieval
+do not consume the paid-operation limit. The in-memory counters are appropriate
+for this single-replica demo; a multi-replica production deployment needs a
+shared rate limit store.
 
 ## Temporal Cloud outside the demo registry
 

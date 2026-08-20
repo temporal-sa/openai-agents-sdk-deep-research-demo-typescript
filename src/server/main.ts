@@ -7,6 +7,7 @@ import express, {
   type RequestHandler,
   type Response,
 } from "express";
+import { rateLimit } from "express-rate-limit";
 import { randomUUID } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import type { Server } from "node:http";
@@ -32,11 +33,23 @@ import {
 
 export type AuthMode = "disabled" | "temporal-ingress";
 
+interface RateLimitPolicy {
+  limit: number;
+  windowMs: number;
+}
+
+interface AppRateLimits {
+  pageViews?: Partial<RateLimitPolicy>;
+  startResearch?: Partial<RateLimitPolicy>;
+}
+
 export interface CreateAppOptions {
   authMode?: AuthMode;
   artifactsPath?: string;
+  frontendOrigins?: readonly string[];
   getTemporalClient?: () => Promise<Client>;
   projectRoot?: string;
+  rateLimits?: AppRateLimits;
   temporal?: TemporalConfig;
 }
 
@@ -67,8 +80,47 @@ class HttpError extends Error {
   }
 }
 
+const DEFAULT_PAGE_VIEW_RATE_LIMIT: RateLimitPolicy = {
+  limit: 120,
+  windowMs: 60_000,
+};
+
+const DEFAULT_START_RESEARCH_RATE_LIMIT: RateLimitPolicy = {
+  limit: 5,
+  windowMs: 60 * 60_000,
+};
+
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function configuredFrontendOrigins(
+  configured: readonly string[],
+): ReadonlySet<string> {
+  const origins = new Set<string>();
+
+  for (const candidate of configured) {
+    const origin = candidate.trim();
+    let parsed: URL;
+    try {
+      parsed = new URL(origin);
+    } catch {
+      throw new Error(
+        `FRONTEND_ORIGINS contains an invalid origin: ${candidate}`,
+      );
+    }
+    if (
+      (parsed.protocol !== "http:" && parsed.protocol !== "https:") ||
+      parsed.origin !== origin
+    ) {
+      throw new Error(
+        `FRONTEND_ORIGINS entries must be exact http(s) origins without paths: ${candidate}`,
+      );
+    }
+    origins.add(origin);
+  }
+
+  return origins;
 }
 
 export function configuredAuthMode(
@@ -154,6 +206,17 @@ function ingressAuth(authMode: AuthMode): RequestHandler {
   };
 }
 
+function authenticatedEmailRateLimitKey(
+  _request: Request,
+  response: Response,
+): string {
+  const email: unknown = response.locals.authEmail;
+  if (typeof email !== "string" || !email) {
+    throw new Error("Authenticated email missing before rate limiting");
+  }
+  return email;
+}
+
 function serializeStatus(
   workflowId: string,
   status: ResearchInteraction,
@@ -193,23 +256,42 @@ export function createApp(options: CreateAppOptions = {}): express.Express {
   const getTemporalClient =
     options.getTemporalClient ?? (() => fallbackProvider!.get());
   const authenticate = ingressAuth(mode);
+  const allowedFrontendOrigins = configuredFrontendOrigins(
+    options.frontendOrigins ??
+      (process.env.FRONTEND_ORIGINS ?? "")
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+  );
+  const pageViewRateLimit = {
+    ...DEFAULT_PAGE_VIEW_RATE_LIMIT,
+    ...options.rateLimits?.pageViews,
+  };
+  const startResearchRateLimit = {
+    ...DEFAULT_START_RESEARCH_RATE_LIMIT,
+    ...options.rateLimits?.startResearch,
+  };
 
-  const origins = (process.env.FRONTEND_ORIGINS ?? "*")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
   app.use(
     cors({
-      origin: origins.includes("*") ? true : origins,
-      credentials: true,
+      origin(origin, callback) {
+        callback(null, !origin || allowedFrontendOrigins.has(origin));
+      },
     }),
   );
   app.use(express.json({ limit: "1mb" }));
 
-  app.get("/", (_request, response) => {
+  const limitPageViews = rateLimit({
+    ...pageViewRateLimit,
+    keyGenerator: authenticatedEmailRateLimitKey,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+  });
+
+  app.get("/", authenticate, limitPageViews, (_request, response) => {
     response.sendFile(path.join(uiRoot, "index.html"));
   });
-  app.get("/success", (_request, response) => {
+  app.get("/success", authenticate, limitPageViews, (_request, response) => {
     response.sendFile(path.join(uiRoot, "success.html"));
   });
   app.use("/static", express.static(uiRoot));
@@ -253,36 +335,52 @@ export function createApp(options: CreateAppOptions = {}): express.Express {
   const api = express.Router();
   api.use(authenticate);
 
-  api.post("/start-research", async (request, response) => {
-    const query = requireText(request.body?.query, "query");
-    const client = await getTemporalClient();
-    const workflowId = `interactive-research-${randomUUID().slice(0, 8)}`;
-    const handle = await client.workflow.start(interactiveResearchWorkflow, {
-      workflowId,
-      taskQueue: config.taskQueue,
-      args: [],
-    });
-
-    try {
-      await handle.startUpdate(startResearchUpdate, {
-        args: [{ query }],
-        waitForStage: WorkflowUpdateStage.ACCEPTED,
+  const limitResearchStarts = rateLimit({
+    ...startResearchRateLimit,
+    keyGenerator: authenticatedEmailRateLimitKey,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    handler: (_request, response) => {
+      response.status(429).json({
+        detail: "Too many research requests. Please try again later.",
       });
-      const status = await handle.query(getStatusQuery);
-      response.status(201).json({
-        ...serializeStatus(workflowId, status),
-        temporal_ui_url: `${temporalUiBaseUrl(config)}/${encodeURIComponent(workflowId)}`,
-      });
-    } catch (error) {
-      await handle.signal(endWorkflowSignal).catch(() => undefined);
-      response.status(502).json({
-        workflow_id: workflowId,
-        status: "failed",
-        detail: `Research initialization failed: ${errorMessage(error)}`,
-        temporal_ui_url: `${temporalUiBaseUrl(config)}/${encodeURIComponent(workflowId)}`,
-      });
-    }
+    },
   });
+
+  api.post(
+    "/start-research",
+    limitResearchStarts,
+    async (request, response) => {
+      const query = requireText(request.body?.query, "query");
+      const client = await getTemporalClient();
+      const workflowId = `interactive-research-${randomUUID().slice(0, 8)}`;
+      const handle = await client.workflow.start(interactiveResearchWorkflow, {
+        workflowId,
+        taskQueue: config.taskQueue,
+        args: [],
+      });
+
+      try {
+        await handle.startUpdate(startResearchUpdate, {
+          args: [{ query }],
+          waitForStage: WorkflowUpdateStage.ACCEPTED,
+        });
+        const status = await handle.query(getStatusQuery);
+        response.status(201).json({
+          ...serializeStatus(workflowId, status),
+          temporal_ui_url: `${temporalUiBaseUrl(config)}/${encodeURIComponent(workflowId)}`,
+        });
+      } catch (error) {
+        await handle.signal(endWorkflowSignal).catch(() => undefined);
+        response.status(502).json({
+          workflow_id: workflowId,
+          status: "failed",
+          detail: `Research initialization failed: ${errorMessage(error)}`,
+          temporal_ui_url: `${temporalUiBaseUrl(config)}/${encodeURIComponent(workflowId)}`,
+        });
+      }
+    },
+  );
 
   api.get("/status/:workflowId", async (request, response) => {
     const workflowId = requireWorkflowId(request.params.workflowId);
@@ -394,8 +492,12 @@ export async function startServer(
   const app = createApp({
     ...(options.authMode ? { authMode: options.authMode } : {}),
     artifactsPath,
+    ...(options.frontendOrigins
+      ? { frontendOrigins: options.frontendOrigins }
+      : {}),
     getTemporalClient: provider.get,
     ...(options.projectRoot ? { projectRoot: options.projectRoot } : {}),
+    ...(options.rateLimits ? { rateLimits: options.rateLimits } : {}),
     ...(options.temporal ? { temporal: options.temporal } : {}),
   });
   const port = options.port ?? Number.parseInt(process.env.PORT ?? "8234", 10);
