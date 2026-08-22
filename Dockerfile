@@ -28,9 +28,14 @@ FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     PORT=8234 \
     PROJECT_ROOT=/app \
-    ARTIFACT_ROOT=/app/artifacts
+    ARTIFACT_ROOT=/app/artifacts \
+    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
