@@ -65,3 +65,8 @@ jobs:
 
       - name: Build production image
         run: docker build --tag openai-deep-research-ts:ci .
+
+      - name: Verify runtime trust store
+        run: >-
+          docker run --rm --entrypoint sh openai-deep-research-ts:ci
+          -c 'test -s "$SSL_CERT_FILE"'
