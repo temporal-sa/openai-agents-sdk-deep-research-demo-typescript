@@ -93,6 +93,8 @@ npm run dev
 Open <http://localhost:8234>. Temporal's local UI is at
 <http://localhost:8233>.
 
+To present the demo, follow [RUNBOOK.md](RUNBOOK.md): the walkthrough beat by beat, and where in the code each part happens.
+
 Check the two probe endpoints:
 
 ```bash
