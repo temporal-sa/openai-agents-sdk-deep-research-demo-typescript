@@ -23,6 +23,13 @@ export function temporalConfig(): TemporalConfig {
 }
 
 export function temporalUiBaseUrl(config = temporalConfig()): string {
+  // tmprl-demo.cloud injects the UI base (https://cloud.temporal.io, or a crashable
+  // workspace's /_temporal) and the namespace to link to.
+  const uiBase = process.env.TEMPORAL_UI_URL?.trim().replace(/\/+$/, "");
+  const uiNamespace = process.env.TEMPORAL_UI_NAMESPACE?.trim();
+  if (uiBase && uiNamespace) {
+    return `${uiBase}/namespaces/${encodeURIComponent(uiNamespace)}/workflows`;
+  }
   if (
     config.address.includes("localhost") ||
     config.address.includes("127.0.0.1")
