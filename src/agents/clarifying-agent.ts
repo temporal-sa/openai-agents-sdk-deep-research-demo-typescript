@@ -20,7 +20,7 @@ export function newClarifyingAgent(): Agent<
 > {
   return new Agent({
     name: "Clarifying Questions Agent",
-    model: "gpt-4o-mini",
+    model: "gpt-6-luna",
     instructions: prompt,
     outputType: clarificationsSchema,
   });

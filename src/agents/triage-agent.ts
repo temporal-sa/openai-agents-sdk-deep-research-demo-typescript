@@ -19,7 +19,7 @@ const bypassPrompt =
 export function newTriageAgent(): Agent<unknown, typeof triageDecisionSchema> {
   return new Agent({
     name: "Triage Agent",
-    model: "gpt-4o-mini",
+    model: "gpt-6-luna",
     instructions:
       process.env.BYPASS_TRIAGE_AGENT === "Y" ? bypassPrompt : normalPrompt,
     outputType: triageDecisionSchema,

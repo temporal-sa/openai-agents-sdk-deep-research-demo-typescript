@@ -263,10 +263,10 @@ connection explicitly.
 
 The current pipeline uses:
 
-- `gpt-4o-mini` for triage, clarification, and image-concept generation
-- `gpt-4o` to plan 5–20 searches
-- the Agents SDK's configured/default model with its hosted web-search tool for
-  each planned search
+- `gpt-6-luna` for triage, clarification, and image-concept generation
+- `gpt-6-luna` to plan 5–20 searches
+- `gpt-6-luna` with the Agents SDK's hosted web-search tool for each planned
+  search
 - `gpt-5.6-sol` to synthesize the report
 - `gpt-image-2.5-flare` with low quality for one best-effort image
 - PDFKit locally for PDF rendering

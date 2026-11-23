@@ -381,7 +381,7 @@ export function newSearchAgent(): Agent<unknown, typeof searchSummarySchema> {
 - Each Activity calls the Agents SDK's `run()` for one agent, with a Zod `outputType`, and returns the typed output. Temporal records that output, so a replay or a retry of a later step doesn't run the agent again.
 - The Workflow file only imports Activity types. The agents, the OpenAI client and the file writes never load in the Workflow sandbox.
 - An agent's whole run, including the hosted web search tool's calls, is one Activity attempt. A retry reruns the agent from the start.
-- The search agent sets no model, so the Agents SDK default applies (`gpt-4.1` in the pinned version, unless `OPENAI_DEFAULT_MODEL` is set). The others name theirs: `gpt-4o-mini` for triage, questions, instructions and the image concept, `gpt-4o` for the plan, `gpt-5.6-sol` for the report.
+- Each agent names its model: `gpt-6-luna` for triage, questions, instructions, the plan, the searches and the image concept, and `gpt-5.6-sol` for the report. `OPENAI_DEFAULT_MODEL` doesn't change them.
 
 **Docs:** [Activities](https://docs.temporal.io/activities), [OpenAI Agents SDK for TypeScript](https://openai.github.io/openai-agents-js/)
 
