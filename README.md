@@ -57,7 +57,7 @@ starts the HTTP server and worker together and shuts both down cleanly on
 - An OpenAI API key with usable quota and access to the configured text, web
   search, and image APIs
 
-Image generation with `gpt-image-1` may require OpenAI organization
+Image generation with `gpt-image-2.5-flare` may require OpenAI organization
 verification. If image generation is unavailable, the report can still
 complete without an image.
 
@@ -267,8 +267,8 @@ The current pipeline uses:
 - `gpt-4o` to plan 5–20 searches
 - the Agents SDK's configured/default model with its hosted web-search tool for
   each planned search
-- `o3-mini` to synthesize the report
-- `gpt-image-1` with low quality for one best-effort image
+- `gpt-5.6-sol` to synthesize the report
+- `gpt-image-2.5-flare` with low quality for one best-effort image
 - PDFKit locally for PDF rendering
 
 One run therefore makes several text-model calls, 5–20 web-search calls, and

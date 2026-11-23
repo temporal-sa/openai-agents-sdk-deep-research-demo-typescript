@@ -23,7 +23,7 @@ export function newWriterAgent(): Agent<unknown, typeof reportDataSchema> {
   return new Agent({
     name: "WriterAgent",
     instructions: prompt,
-    model: "o3-mini",
+    model: "gpt-5.6-sol",
     outputType: reportDataSchema,
   });
 }
