@@ -51,7 +51,7 @@ export async function generateImage(input: {
   try {
     const client = new OpenAI();
     const response = await client.images.generate({
-      model: "gpt-image-1",
+      model: "gpt-image-2.5-flare",
       prompt: input.prompt,
       quality: "low",
       size: options.size,
