@@ -19,7 +19,7 @@ export function newImagegenAgent(): Agent<unknown, typeof imageConceptSchema> {
   return new Agent({
     name: "ImageGenAgent",
     instructions: prompt,
-    model: "gpt-4o-mini",
+    model: "gpt-6-luna",
     outputType: imageConceptSchema,
   });
 }

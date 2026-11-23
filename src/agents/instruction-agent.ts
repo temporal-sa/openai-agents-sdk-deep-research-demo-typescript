@@ -10,7 +10,7 @@ language.`;
 export function newInstructionAgent(): Agent {
   return new Agent({
     name: "Research Instruction Agent",
-    model: "gpt-4o-mini",
+    model: "gpt-6-luna",
     instructions: prompt,
   });
 }

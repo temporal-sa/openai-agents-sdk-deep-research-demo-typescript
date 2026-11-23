@@ -25,6 +25,7 @@ export function newSearchAgent(): Agent<unknown, typeof searchSummarySchema> {
   return new Agent({
     name: "Search agent",
     instructions,
+    model: "gpt-6-luna",
     tools: [webSearchTool()],
     modelSettings: { toolChoice: "required" },
     outputType: searchSummarySchema,

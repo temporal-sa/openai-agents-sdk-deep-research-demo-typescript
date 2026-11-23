@@ -22,7 +22,7 @@ export function newPlannerAgent(): Agent<unknown, typeof webSearchPlanSchema> {
   return new Agent({
     name: "PlannerAgent",
     instructions: prompt,
-    model: "gpt-4o",
+    model: "gpt-6-luna",
     outputType: webSearchPlanSchema,
   });
 }
